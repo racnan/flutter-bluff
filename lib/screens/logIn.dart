@@ -1,7 +1,8 @@
-import 'package:bluff/screens/homescreen.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
+
+import './roomScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -155,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
       print("object");
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => RoomScreen()),
       );
     }
 
