@@ -23,8 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width.roundToDouble();
+    var screenWidth = MediaQuery.of(context).size.width.roundToDouble();
     final screenHeight = MediaQuery.of(context).size.height.roundToDouble();
+    screenWidth = screenWidth < 1000 ? screenWidth : 1000;
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -32,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               child: Text(
@@ -153,7 +154,6 @@ class _LoginScreenState extends State<LoginScreen> {
     //successfull login
     if (response.statusCode == 200) {
       //go to next screen
-      print("object");
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => RoomScreen()),
