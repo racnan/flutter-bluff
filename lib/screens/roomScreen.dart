@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import '../widgets/listOnlineScroll.dart';
+import '../widgets/cardOnline.dart';
+
 class RoomScreen extends StatefulWidget {
+  final String username;
+
+  const RoomScreen({this.username});
+
   @override
   _RoomScreenState createState() => _RoomScreenState();
 }
@@ -21,39 +28,60 @@ class _RoomScreenState extends State<RoomScreen> {
   });
 
   // keeps track of the current room state
-  var currRoomState = roomState.inactive;
+  var currRoomState = roomState.error;
 
   // used for first initialization, this is set to false
   // after the screen if initialized in "build" method
   bool initialized = false;
+
+  // name of the players
+  List listOfPlayers = [];
+
+  //name of the host
+  String host;
 
   @override
   Widget build(BuildContext context) {
     // this is done so that socket.emit() is only executed for first build
     // otherwise, with every setState() socket.emit() will be called which
     // will rebuild setting of socket.emit() again.[Looped]
+
     if (!initialized) {
-      socket.emit('join', 'room1');
+      socket.emit('join', widget.username);
       initialized = true;
     }
 
     // server sends the state of the room after receiving "join"
-    // data received is a string
+    // or when a user disconnected
     socket.on('join-resp', (data) {
-      // rebuild wiht new room state
+      // rebuild with new room state
+      print(widget.username);
+      print(data);
       setState(() {
-        if (data == "active") {
+        if (data[0] == "active") {
           currRoomState = roomState.active;
-        } else if (data == "inactive") {
+          listOfPlayers = data[1];
+        } else if (data[0] == "inactive") {
           currRoomState = roomState.inactive;
-        } else if (data == "waiting") {
+          listOfPlayers = data[1];
+          host = widget.username;
+        }
+        // if the state is waiting and user is not the host
+        else if (data[0] == "waiting" && (data[2] != widget.username)) {
           currRoomState = roomState.waiting;
+          listOfPlayers = data[1];
+        }
+        // if the state is waiting and user is the host
+        else if (data[0] == "waiting" && data[2] == widget.username) {
+          currRoomState = roomState.inactive;
+          listOfPlayers = data[1];
         }
       });
     });
 
     var screenWidth = MediaQuery.of(context).size.width.roundToDouble();
-    final screenHeight = MediaQuery.of(context).size.height.roundToDouble();
+    final screenHeight =
+        MediaQuery.of(context).size.height.roundToDouble() - 50.0;
     screenWidth = screenWidth < 1000 ? screenWidth : 1000;
 
     return Scaffold(body: returnStateScreen(screenWidth, screenHeight));
@@ -64,7 +92,7 @@ class _RoomScreenState extends State<RoomScreen> {
     if (currRoomState == roomState.active) {
       return activeState(screenWidth);
     } else if (currRoomState == roomState.inactive) {
-      return inactiveState();
+      return inactiveState(screenWidth, screenHeight);
     } else if (currRoomState == roomState.waiting) {
       return waitingState();
     } else
@@ -74,32 +102,58 @@ class _RoomScreenState extends State<RoomScreen> {
   // default state, just displays error text
   Widget errorState(double screenWidth) {
     return Center(
-      child: Text(
-        "Oops! something went wrong. Please wait or try again later.",
-        style: TextStyle(
-            fontSize: screenWidth * 0.04,
-            color: Colors.black,
-            fontWeight: FontWeight.bold),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Text(
+          "Oops! something went wrong. Please wait or try again later.",
+          style: TextStyle(
+              fontSize: screenWidth * 0.03,
+              color: Colors.black,
+              fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
 
   Widget activeState(double screenWidth) {
     return Center(
-      child: Text(
-        "Please wait for the next game to start!",
-        style: TextStyle(
-            fontSize: screenWidth * 0.04,
-            color: Colors.black,
-            fontWeight: FontWeight.bold),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Text(
+          "Please wait for the next game to start!",
+          style: TextStyle(
+              fontSize: screenWidth * 0.04,
+              color: Colors.black,
+              fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
 
   // state when user is the host
-  Widget inactiveState() {
+  Widget inactiveState(double screenWidth, double screenHeight) {
     return Container(
-      color: Colors.cyan,
+      width: double.infinity,
+      padding: EdgeInsets.all(10),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            height: screenHeight / 3,
+            width: screenWidth,
+            // color: Colors.red,
+          ),
+          Container(
+            height: (2 * screenHeight) / 3,
+            width: screenWidth,
+            // color: Colors.blue,
+            child: OnlineScroller(
+              widgetList: listOfPlayersOnline(),
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -108,33 +162,8 @@ class _RoomScreenState extends State<RoomScreen> {
       color: Colors.green,
     );
   }
-}
 
-/* Scaffold(
-        body: FutureBuilder<String>(
-      future: s.main(),
-      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-        print(snapshot.data);
-        if (snapshot.hasData) {
-          if (snapshot.data == "active") {
-            return activeState();
-          } else if (snapshot.data == "inactive") {
-            return inactiveState();
-          } else if (snapshot.data == "waiting") {
-            return waitingState();
-          }
-        } else if (snapshot.hasError) {
-          return Center(
-              child: Text("An error occureed! Please try later",
-                  style: TextStyle(
-                      fontSize: screenWidth * 0.03,
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold)));
-        } else {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        return Container();
-      },
-    )); */
+  List<Widget> listOfPlayersOnline() {
+    return listOfPlayers.map((name) => CardOnline(name: name)).toList();
+  }
+}

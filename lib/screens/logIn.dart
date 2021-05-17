@@ -156,7 +156,10 @@ class _LoginScreenState extends State<LoginScreen> {
       //go to next screen
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => RoomScreen()),
+        MaterialPageRoute(
+            builder: (context) => RoomScreen(
+                  username: username,
+                )),
       );
     }
 
