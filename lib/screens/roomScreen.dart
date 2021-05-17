@@ -28,17 +28,20 @@ class _RoomScreenState extends State<RoomScreen> {
   });
 
   // keeps track of the current room state
-  var currRoomState = roomState.error;
+  var currRoomState = roomState.inactive;
 
   // used for first initialization, this is set to false
   // after the screen if initialized in "build" method
   bool initialized = false;
 
   // name of the players
-  List listOfPlayers = [];
+  List listOfPlayers = ["abc", "abc", "abc", "abcd"];
 
   //name of the host
   String host;
+
+  // number of decks to be used in the game
+  var numberOfDecks = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -143,13 +146,15 @@ class _RoomScreenState extends State<RoomScreen> {
             height: screenHeight / 3,
             width: screenWidth,
             // color: Colors.red,
+            child: hostControl(),
           ),
           Container(
             height: (2 * screenHeight) / 3,
             width: screenWidth,
             // color: Colors.blue,
             child: OnlineScroller(
-              widgetList: listOfPlayersOnline(),
+              widgetList:
+                  listOfPlayers.map((name) => CardOnline(name: name)).toList(),
             ),
           )
         ],
@@ -163,7 +168,45 @@ class _RoomScreenState extends State<RoomScreen> {
     );
   }
 
-  List<Widget> listOfPlayersOnline() {
-    return listOfPlayers.map((name) => CardOnline(name: name)).toList();
+  // the upper part of the host screen
+  // with deck control
+
+  Widget hostControl() {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Container(
+                margin: EdgeInsets.all(10),
+                child: Text(
+                  "Number of decks",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                )),
+            Container(
+              margin: EdgeInsets.all(10),
+              child: DropdownButton<int>(
+                value: numberOfDecks,
+                onChanged: (value) {
+                  setState(() {
+                    numberOfDecks = value;
+                  });
+                },
+                items:
+                    <int>[1, 2, 3, 4].map<DropdownMenuItem<int>>((int value) {
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text(value.toString()),
+                  );
+                }).toList(),
+              ),
+            ),
+          ]),
+        ],
+      ),
+    );
   }
 }

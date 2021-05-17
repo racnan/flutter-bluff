@@ -16,10 +16,12 @@ class CardOnline extends StatelessWidget {
             Icons.circle,
             color: Colors.green,
           ),
-          title: (Text(
-            this.name,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          )),
+          title: Center(
+            child: Text(
+              this.name,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
           subtitle: this.cardsLeft == null
               ? Text("")
               : Text("Cards left ${this.cardsLeft}"),
