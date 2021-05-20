@@ -4,6 +4,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../widgets/listOnlineScroll.dart';
 import '../widgets/cardOnline.dart';
+import './mainGameScreen.dart';
 
 class RoomScreen extends StatefulWidget {
   final String username;
@@ -41,6 +42,7 @@ class _RoomScreenState extends State<RoomScreen> {
   // after the screen if initialized in "build" method
   bool initialized = false;
 
+  //TODO: make this empty
   // name of the players
   List listOfPlayers = ["abc", "abc", "abc", "abcd"];
 
@@ -113,6 +115,11 @@ class _RoomScreenState extends State<RoomScreen> {
           numberOfPlayers = listOfPlayers.length;
         }
       });
+    });
+
+    socket.on('start-resp', (_) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => GameScreen()));
     });
 
     var screenWidth = MediaQuery.of(context).size.width.roundToDouble();
@@ -290,7 +297,7 @@ class _RoomScreenState extends State<RoomScreen> {
                           } catch (_) {
                             return "invalid";
                           }
-                          print(tmp);
+
                           if (tmp < 1 ||
                               tmp >
                                   ((numberOfDecks * 52) / numberOfPlayers)
@@ -307,11 +314,22 @@ class _RoomScreenState extends State<RoomScreen> {
               child: ElevatedButton(
                   child: Text("Set"),
                   onPressed: () {
-                    print(";");
                     if (_formKey.currentState.validate()) {
                       cardsPerPlayers = int.parse(textController.text);
                       socket.emit(
                           'update-decks', [numberOfDecks, cardsPerPlayers]);
+                    }
+                  }),
+            ),
+            Container(
+              // padding: EdgeInsets.all(10),
+              margin: EdgeInsets.only(top: 20),
+              child: ElevatedButton(
+                  child: Text("Start"),
+                  onPressed: () {
+                    if (_formKey.currentState.validate()) {
+                      cardsPerPlayers = int.parse(textController.text);
+                      socket.emit('start', [numberOfDecks, cardsPerPlayers]);
                     }
                   }),
             )
