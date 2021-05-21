@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import './mainGameScreen.dart';
+
 import '../widgets/listOnlineScroll.dart';
 import '../widgets/cardOnline.dart';
-import './mainGameScreen.dart';
 
 class RoomScreen extends StatefulWidget {
   final String username;
@@ -39,7 +40,7 @@ class _RoomScreenState extends State<RoomScreen> {
   var currRoomState = roomState.inactive;
 
   // used for first initialization, this is set to false
-  // after the screen if initialized in "build" method
+  // after the screen is initialized in "build" method
   bool initialized = false;
 
   //TODO: make this empty
@@ -81,7 +82,6 @@ class _RoomScreenState extends State<RoomScreen> {
       // data[2]: host
       // data[3]: numberOfDecks
       // data[4]: cards per player
-      print(data);
 
       setState(() {
         if (data[0] == "active") {
@@ -119,7 +119,11 @@ class _RoomScreenState extends State<RoomScreen> {
 
     socket.on('start-resp', (_) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => GameScreen()));
+          context,
+          MaterialPageRoute(
+              builder: (context) => GameScreen(
+                    username: widget.username,
+                  )));
     });
 
     var screenWidth = MediaQuery.of(context).size.width.roundToDouble();

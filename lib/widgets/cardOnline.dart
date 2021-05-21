@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CardOnline extends StatelessWidget {
   final String name;
-  final String cardsLeft;
+  final int cardsLeft;
   final String currentTurn;
 
   CardOnline({@required this.name, this.cardsLeft, this.currentTurn});
