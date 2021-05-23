@@ -9,27 +9,50 @@ class CardOnline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height.roundToDouble();
     return Container(
-      child: Card(
-        child: ListTile(
-          leading: Icon(
-            Icons.circle,
-            color: Colors.green,
-          ),
-          title: Center(
+      height: screenHeight / 12,
+      margin: EdgeInsets.all(5),
+      padding: EdgeInsets.all(5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Container(
             child: Text(
-              this.name,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              name,
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ),
-          subtitle: this.cardsLeft == null
-              ? Text("")
-              : Text("Cards left ${this.cardsLeft}"),
-        ),
-        color: this.currentTurn == this.name
-            ? Colors.greenAccent[100]
-            : Colors.blue[100],
+          if (cardsLeft != null)
+            Container(
+              child: Text("Cards left ${this.cardsLeft}"),
+            )
+        ],
       ),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.black, width: 1)),
     );
   }
 }
+/* Container(
+      child: ListTile(
+        leading: Icon(
+          Icons.circle,
+          color: Colors.green,
+        ),
+        title: Center(
+          child: Text(
+            name,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+        ),
+        subtitle: this.cardsLeft == null
+            ? Text("")
+            : Text("Cards left ${this.cardsLeft}"),
+      ),
+      color: this.currentTurn == this.name
+          ? Colors.greenAccent[100]
+          : Colors.blue[100],
+    );
+  } */

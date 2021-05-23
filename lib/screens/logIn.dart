@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import './roomScreen.dart';
 
+import '../widgets/button.dart';
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -37,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Container(
               child: Text(
-                "Welcome,",
+                "स्वागतम,",
                 style: TextStyle(
                     fontSize: screenWidth * 0.1,
                     fontWeight: FontWeight.bold,
@@ -67,9 +69,35 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: usernameController,
                         decoration: InputDecoration(
                             labelText: "Username",
+                            labelStyle: TextStyle(color: Colors.black),
                             border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)))),
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 2.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide(
+                                color: Colors.grey,
+                                width: 1.0,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 2.0,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 2.0,
+                              ),
+                            )),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Please Enter Username";
@@ -87,9 +115,35 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: passwordController,
                         decoration: InputDecoration(
                             labelText: "Password",
+                            labelStyle: TextStyle(color: Colors.black),
                             border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)))),
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 2.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide(
+                                color: Colors.grey,
+                                width: 1.0,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 2.0,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                                width: 2.0,
+                              ),
+                            )),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Please Enter Password";
@@ -98,18 +152,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                     ),
-                    Container(
-                        width: screenWidth * 0.3,
-                        height: screenHeight * 0.05,
-                        child: ElevatedButton(
-                            onPressed: () => {
-                                  if (_formKey.currentState.validate())
-                                    {
-                                      httpPost(usernameController.text,
-                                          passwordController.text)
-                                    }
-                                },
-                            child: Text("Submit")))
+                    CustomButtom(
+                      onPressed: () => {
+                        if (_formKey.currentState.validate())
+                          {
+                            httpPost(usernameController.text,
+                                passwordController.text)
+                          }
+                      },
+                      text: "Submit",
+                      width: screenWidth * 0.3,
+                      height: screenHeight * 0.05,
+                    )
                   ],
                 ),
               ),

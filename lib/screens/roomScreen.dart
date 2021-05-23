@@ -6,6 +6,7 @@ import './mainGameScreen.dart';
 
 import '../widgets/listOnlineScroll.dart';
 import '../widgets/cardOnline.dart';
+import '../widgets/button.dart';
 
 class RoomScreen extends StatefulWidget {
   final String username;
@@ -66,8 +67,8 @@ class _RoomScreenState extends State<RoomScreen> {
   @override
   Widget build(BuildContext context) {
     // this is done so that socket.emit() is only executed for first build
-    // otherwise, with every setState() socket.emit() will be called which
-    // will rebuild setting of socket.emit() again.[Looped]
+    // otherwise, with every setState() socket.emit('join) will be called which
+    // will again cause a rebuild.[Looped]
     if (!initialized) {
       socket.emit('join', widget.username);
       initialized = true;
@@ -190,7 +191,7 @@ class _RoomScreenState extends State<RoomScreen> {
             height: screenHeight / 2,
             width: screenWidth,
             // color: Colors.red,
-            child: hostControl(),
+            child: hostControl(screenWidth, screenHeight),
           ),
           Container(
             height: screenHeight / 2,
@@ -236,7 +237,7 @@ class _RoomScreenState extends State<RoomScreen> {
   // the upper part of the host screen
   // with deck control
 
-  Widget hostControl() {
+  Widget hostControl(double screenWidth, double screenHeight) {
     return Center(
       // color: Colors.amber,
       child: SingleChildScrollView(
@@ -280,7 +281,7 @@ class _RoomScreenState extends State<RoomScreen> {
               Container(
                   padding: EdgeInsets.all(10),
                   child: Text(
-                    "Cards per player",
+                    "Cards per player :",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
@@ -289,10 +290,13 @@ class _RoomScreenState extends State<RoomScreen> {
               Container(
                   height: 60,
                   width: 60,
+                  // color: Colors.amber,
                   // padding: EdgeInsets.all(8),
                   child: Form(
                       key: _formKey,
                       child: TextFormField(
+                        cursorColor: Colors.black,
+                        textAlign: TextAlign.center,
                         controller: textController,
                         validator: (value) {
                           int tmp;
@@ -315,27 +319,33 @@ class _RoomScreenState extends State<RoomScreen> {
             ]),
             Container(
               margin: EdgeInsets.all(5),
-              child: ElevatedButton(
-                  child: Text("Set"),
-                  onPressed: () {
-                    if (_formKey.currentState.validate()) {
-                      cardsPerPlayers = int.parse(textController.text);
-                      socket.emit(
-                          'update-decks', [numberOfDecks, cardsPerPlayers]);
-                    }
-                  }),
+              child: CustomButtom(
+                text: "Set",
+                onPressed: () {
+                  if (_formKey.currentState.validate()) {
+                    cardsPerPlayers = int.parse(textController.text);
+                    socket
+                        .emit('update-decks', [numberOfDecks, cardsPerPlayers]);
+                  }
+                },
+                height: screenHeight / 20,
+                width: screenWidth / 5,
+              ),
             ),
             Container(
               // padding: EdgeInsets.all(10),
               margin: EdgeInsets.only(top: 20),
-              child: ElevatedButton(
-                  child: Text("Start"),
-                  onPressed: () {
-                    if (_formKey.currentState.validate()) {
-                      cardsPerPlayers = int.parse(textController.text);
-                      socket.emit('start', [numberOfDecks, cardsPerPlayers]);
-                    }
-                  }),
+              child: CustomButtom(
+                text: "Start",
+                onPressed: () {
+                  if (_formKey.currentState.validate()) {
+                    cardsPerPlayers = int.parse(textController.text);
+                    socket.emit('start', [numberOfDecks, cardsPerPlayers]);
+                  }
+                },
+                height: screenHeight / 20,
+                width: screenWidth / 5,
+              ),
             )
           ],
         ),
@@ -373,7 +383,7 @@ class _RoomScreenState extends State<RoomScreen> {
               Container(
                   margin: EdgeInsets.all(10),
                   child: Text(
-                    "Cards per player",
+                    "Cards per player:",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
