@@ -1,5 +1,5 @@
-// import 'package:bluff/screens/mainGameScreen.dart';
-import 'package:bluff/screens/roomScreen.dart';
+import 'package:bluff/screens/mainGameScreen.dart';
+// import 'package:bluff/screens/roomScreen.dart';
 import 'package:flutter/material.dart';
 
 // import './screens/logIn.dart';
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Bluff',
-      home: RoomScreen(),
+      home: GameScreen(),
     );
   }
 }

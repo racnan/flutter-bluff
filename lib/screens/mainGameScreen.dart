@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import './checkCards.dart';
+
 import '../widgets/listOnlineScroll.dart';
 import '../widgets/cardOnline.dart';
 import '../widgets/button.dart';
@@ -33,7 +35,13 @@ class _GameScreenState extends State<GameScreen> {
   String currentNumber = '0';
 
   // true if current turn is users
-  var userTurn = true;
+  var userTurn = false;
+
+  // if user can check the turn before
+  var userCheck = false;
+
+  //
+  var showCards = false;
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +74,10 @@ class _GameScreenState extends State<GameScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            // color: Colors.blue,
-            height: screenHeight / 2,
-            width: screenWidth,
-            child: userTurn == true
-                ? turnDisplay(screenHeight, screenWidth)
-                : normalDisplay(),
-          ),
+              // color: Colors.blue,
+              height: screenHeight / 2,
+              width: screenWidth,
+              child: upperDisplay(screenHeight, screenWidth)),
           Container(
             height: screenHeight / 2,
             width: screenWidth,
@@ -91,6 +96,76 @@ class _GameScreenState extends State<GameScreen> {
     ));
   }
 
+  Widget upperDisplay(double screenHeight, double screenWidth) {
+    if (userTurn && userCheck) {
+      return checkDisplay(screenHeight, screenWidth);
+    } else if (userTurn && !userCheck) {
+      return turnDisplay(screenHeight, screenWidth);
+    } else {
+      return normalDisplay(screenHeight, screenWidth);
+    }
+  }
+
+  Widget checkDisplay(double screenHeight, double screenWidth) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(10),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              if (currentNumber != '1')
+                Container(
+                    margin: EdgeInsets.all(10),
+                    child: Text(
+                      'चाल : $currentNumber',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: screenHeight * 0.03),
+                    )),
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: CustomButtom(
+                    height: screenHeight / 20,
+                    width: screenWidth / 3,
+                    onPressed: () {},
+                    text: "Check Cards",
+                  )),
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: CustomButtom(
+                    height: screenHeight / 20,
+                    width: screenWidth / 4,
+                    onPressed: () {
+                      setState(() {
+                        userCheck = false;
+                      });
+                    },
+                    text: "Play",
+                  )),
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: CustomButtom(
+                    height: screenHeight / 20,
+                    width: screenWidth / 4,
+                    onPressed: () {},
+                    text: "Bluff",
+                  )),
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: CustomButtom(
+                    height: screenHeight / 20,
+                    width: screenWidth / 4,
+                    onPressed: () {},
+                    text: "पास",
+                  )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget turnDisplay(double screenHeight, double screenWidth) {
     return Center(
       child: Padding(
@@ -102,17 +177,17 @@ class _GameScreenState extends State<GameScreen> {
                 Container(
                     margin: EdgeInsets.all(10),
                     child: CustomButtom(
-                      height: screenHeight / 15,
-                      width: screenWidth / 2,
+                      height: screenHeight / 20,
+                      width: screenWidth / 3,
                       onPressed: () {},
-                      text: "Select number",
+                      text: "Select चाल",
                     )),
               if (currentNumber != '0')
                 Container(
                     margin: EdgeInsets.all(10),
                     child: Text(
                       //TODO: Turn this into hindi
-                      'Current number: $currentNumber',
+                      'चाल : $currentNumber',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -121,24 +196,24 @@ class _GameScreenState extends State<GameScreen> {
               Container(
                   margin: EdgeInsets.all(10),
                   child: CustomButtom(
-                    height: screenHeight / 15,
-                    width: screenWidth / 2,
+                    height: screenHeight / 20,
+                    width: screenWidth / 3,
                     onPressed: () {},
                     text: "Check Cards",
                   )),
               Container(
                   margin: EdgeInsets.all(10),
                   child: CustomButtom(
-                    height: screenHeight / 15,
-                    width: screenWidth / 3,
+                    height: screenHeight / 20,
+                    width: screenWidth / 4,
                     onPressed: () {},
                     text: "Play Fair",
                   )),
               Container(
                   margin: EdgeInsets.all(10),
                   child: CustomButtom(
-                    height: screenHeight / 15,
-                    width: screenWidth / 3,
+                    height: screenHeight / 20,
+                    width: screenWidth / 4,
                     onPressed: () {},
                     text: "Bluff",
                   ))
@@ -149,7 +224,34 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget normalDisplay() {
-    return Container();
+  Widget normalDisplay(double screenHeight, double screenWidth) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(10),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text(
+                    'चाल : $currentNumber',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: screenHeight * 0.03),
+                  )),
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: CustomButtom(
+                    height: screenHeight / 20,
+                    width: screenWidth / 3,
+                    onPressed: () {},
+                    text: "Check Cards",
+                  )),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
