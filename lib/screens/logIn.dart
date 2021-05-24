@@ -29,6 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final screenHeight = MediaQuery.of(context).size.height.roundToDouble();
     screenWidth = screenWidth < 1000 ? screenWidth : 1000;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         width: double.infinity,
         // color: Colors.amber,

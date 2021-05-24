@@ -33,6 +33,7 @@ class _RoomScreenState extends State<RoomScreen> {
   // disconnect the Socket connection when the user leaves
   @override
   void dispose() {
+    print("dispose");
     socket.io.disconnect();
     super.dispose();
   }
@@ -44,9 +45,8 @@ class _RoomScreenState extends State<RoomScreen> {
   // after the screen is initialized in "build" method
   bool initialized = false;
 
-  //TODO: make this empty
   // name of the players
-  List listOfPlayers = ["abc", "abc", "abc", "abcd"];
+  List listOfPlayers = [];
 
   // name of the host
   String host;
@@ -70,8 +70,8 @@ class _RoomScreenState extends State<RoomScreen> {
     // otherwise, with every setState() socket.emit('join) will be called which
     // will again cause a rebuild.[Looped]
     if (!initialized) {
-      socket.emit('join', widget.username);
       initialized = true;
+      socket.emit('join', widget.username);
     }
 
     // server sends the state of the room after receiving "join"
@@ -132,7 +132,9 @@ class _RoomScreenState extends State<RoomScreen> {
         MediaQuery.of(context).size.height.roundToDouble() - 50.0;
     screenWidth = screenWidth < 1000 ? screenWidth : 1000;
 
-    return Scaffold(body: returnStateScreen(screenWidth, screenHeight));
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: returnStateScreen(screenWidth, screenHeight));
   }
 
   // returns the body of the screen according to the current state
