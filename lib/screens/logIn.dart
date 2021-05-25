@@ -202,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void httpPost(String username, String password) async {
-    var url = Uri.parse('http://localhost:3000/login');
+    var url = Uri.parse('http://192.168.1.38:3000/login');
     var response = await http
         .post(url, body: {'username': username, 'password': password});
 

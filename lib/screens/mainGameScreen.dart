@@ -18,16 +18,17 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   // intialize the socketed connection with the server
-  IO.Socket socket = IO.io('http://localhost:3000/game', <String, dynamic>{
+  IO.Socket socket = IO.io('http://192.168.1.38:3000/game', <String, dynamic>{
     'transports': ['websocket'],
   });
 
   // disconnect the Socket connection when the user leaves
-  @override
+  /* @override
   void dispose() {
+    print("Screen3: dispose");
     socket.io.disconnect();
     super.dispose();
-  }
+  } */
 
   // used for first initialization, this is set to false
   // after the screen is initialized in "build" method
@@ -39,10 +40,10 @@ class _GameScreenState extends State<GameScreen> {
   String currentNumber = '0';
 
   // true if current turn is users
-  var userTurn = true;
+  var userTurn = false;
 
   // if user can check the turn before
-  var userCheck = true;
+  var userCheck = false;
 
   // display cards
   var showCards = false;
@@ -55,7 +56,7 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("Build");
+    print("Screen3: Build");
     // this is done so that socket.emit() is only executed for first build
     // otherwise, with every setState() socket.emit('join) will be called which
     // will again cause a rebuild.[Looped]
@@ -70,8 +71,7 @@ class _GameScreenState extends State<GameScreen> {
     // data[2] -> [[1,3],[13,2],...] ordered deck
     // data[3] -> "username" current turn
     socket.on('intialize-resp', (data) {
-      print(data);
-      print(mainGameList);
+      // print(data);
       setState(() {
         mainGameList = data[0];
         userDeck = data[1];
@@ -82,8 +82,14 @@ class _GameScreenState extends State<GameScreen> {
         } else {
           userTurn = false;
         }
+        // print("MG: $mainGameList");
       });
     });
+
+    print(mainGameList);
+    print(userDeck);
+    print(orderedDeck);
+    print(userTurn);
 
     var screenWidth = MediaQuery.of(context).size.width.roundToDouble();
     final screenHeight =

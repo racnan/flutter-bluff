@@ -26,14 +26,14 @@ enum roomState { inactive, active, waiting, error }
 
 class _RoomScreenState extends State<RoomScreen> {
   // intialize the socketed connection with the server
-  IO.Socket socket = IO.io('http://localhost:3000/room', <String, dynamic>{
+  IO.Socket socket = IO.io('http://192.168.1.38:3000/room', <String, dynamic>{
     'transports': ['websocket'],
   });
 
   // disconnect the Socket connection when the user leaves
   @override
   void dispose() {
-    print("dispose");
+    print("Screen2: dispose");
     socket.io.disconnect();
     super.dispose();
   }
@@ -83,7 +83,7 @@ class _RoomScreenState extends State<RoomScreen> {
       // data[2]: host
       // data[3]: numberOfDecks
       // data[4]: cards per player
-
+      print("RS: $data");
       setState(() {
         if (data[0] == "active") {
           currRoomState = roomState.active;
@@ -119,7 +119,7 @@ class _RoomScreenState extends State<RoomScreen> {
     });
 
     socket.on('start-resp', (_) {
-      Navigator.pushReplacement(
+      Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => GameScreen(
