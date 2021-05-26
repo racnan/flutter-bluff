@@ -33,7 +33,6 @@ class _RoomScreenState extends State<RoomScreen> {
   // disconnect the Socket connection when the user leaves
   @override
   void dispose() {
-    print("Screen2: dispose");
     socket.io.disconnect();
     super.dispose();
   }
@@ -60,6 +59,9 @@ class _RoomScreenState extends State<RoomScreen> {
   // cards per player
   var cardsPerPlayers = 1;
 
+  // if the game has started
+  var isStarted = false;
+
   // for entering number of cards per player
   final _formKey = GlobalKey<FormState>();
   final TextEditingController textController = TextEditingController();
@@ -83,7 +85,6 @@ class _RoomScreenState extends State<RoomScreen> {
       // data[2]: host
       // data[3]: numberOfDecks
       // data[4]: cards per player
-      print("RS: $data");
       setState(() {
         if (data[0] == "active") {
           currRoomState = roomState.active;
@@ -119,12 +120,18 @@ class _RoomScreenState extends State<RoomScreen> {
     });
 
     socket.on('start-resp', (_) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => GameScreen(
-                    username: widget.username,
-                  )));
+      // this function was being called more than once and hence
+      // was causing navigatior to push two pages.
+      // Therefore added this if statement
+      if (!isStarted) {
+        isStarted = true;
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => GameScreen(
+                      username: widget.username,
+                    )));
+      }
     });
 
     var screenWidth = MediaQuery.of(context).size.width.roundToDouble();
@@ -326,8 +333,8 @@ class _RoomScreenState extends State<RoomScreen> {
                 onPressed: () {
                   if (_formKey.currentState.validate()) {
                     cardsPerPlayers = int.parse(textController.text);
-                    socket
-                        .emit('update-decks', [numberOfDecks, cardsPerPlayers]);
+                    socket.emit('update-decks',
+                        [widget.username, numberOfDecks, cardsPerPlayers]);
                   }
                 },
                 height: screenHeight / 20,
@@ -342,7 +349,10 @@ class _RoomScreenState extends State<RoomScreen> {
                 onPressed: () {
                   if (_formKey.currentState.validate()) {
                     cardsPerPlayers = int.parse(textController.text);
-                    socket.emit('start', [numberOfDecks, cardsPerPlayers]);
+                    socket.emit(
+                      'start',
+                      [widget.username, numberOfDecks, cardsPerPlayers],
+                    );
                   }
                 },
                 height: screenHeight / 20,
