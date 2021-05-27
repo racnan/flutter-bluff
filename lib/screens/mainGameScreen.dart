@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-import './checkCards.dart';
-
 import '../widgets/listOnlineScroll.dart';
 import '../widgets/cardOnline.dart';
 import '../widgets/button.dart';
+import '../widgets/checkCards.dart';
 
 class GameScreen extends StatefulWidget {
   final String username;
@@ -34,12 +33,24 @@ class _GameScreenState extends State<GameScreen> {
   var initialized = false;
 
   // list with username and cards left arranged according turns.
-  var mainGameList = [];
+  var mainGameList = [
+    ["abc", 2],
+    ["xyz", 6],
+    ["abc", 2],
+    ["xyz", 6],
+    ["abc", 2],
+    ["xyz", 6],
+  ];
 
+  // the current "chaal"
+  // "0" represents that no chaal is selected
   String currentNumber = '0';
 
+  // shows the chaal select screen when true
+  var chaalSelect = false;
+
   // true if current turn is users
-  var userTurn = false;
+  var userTurn = true;
 
   // if user can check the turn before
   var userCheck = false;
@@ -47,11 +58,19 @@ class _GameScreenState extends State<GameScreen> {
   // display cards
   var showCards = false;
 
-  // userdeck
+  // userdeck in numbers
   var userDeck = [];
 
-  // orderdeck
-  var orderedDeck = [];
+  // orderdeck to show in "Check Cards"
+  var orderedDeck = [
+    [1, 3],
+    [2, 5],
+    [1, 6],
+    [1, 7],
+    [1, 8],
+    [1, 9],
+    [1, 10],
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +138,9 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget upperDisplay(double screenHeight, double screenWidth) {
     if (showCards) {
-      return CheckCards(cards: orderedDeck);
+      return showCardsDisplay(screenHeight, screenWidth);
+    } else if (chaalSelect) {
+      return chaalDisplay(screenHeight, screenWidth);
     } else if (userTurn && userCheck) {
       return checkDisplay(screenHeight, screenWidth);
     } else if (userTurn && !userCheck) {
@@ -127,6 +148,34 @@ class _GameScreenState extends State<GameScreen> {
     } else {
       return normalDisplay(screenHeight, screenWidth);
     }
+  }
+
+  Widget chaalDisplay(double screenHeight, double screenWidth) {
+    return SingleChildScrollView();
+  }
+
+  Widget showCardsDisplay(double screenHeight, double screenWidth) {
+    return Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+      Container(
+        height: screenHeight / 3,
+        child: OnlineScroller(
+            widgetList: orderedDeck
+                .map((data) => CheckCards(card: data[0], quantity: data[1]))
+                .toList()),
+      ),
+      Container(
+        child: CustomButtom(
+          height: screenHeight / 15,
+          width: screenWidth / 3,
+          onPressed: () {
+            setState(() {
+              showCards = false;
+            });
+          },
+          text: "Back",
+        ),
+      )
+    ]);
   }
 
   Widget checkDisplay(double screenHeight, double screenWidth) {
@@ -151,7 +200,11 @@ class _GameScreenState extends State<GameScreen> {
                   child: CustomButtom(
                     height: screenHeight / 20,
                     width: screenWidth / 3,
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        showCards = true;
+                      });
+                    },
                     text: "Check Cards",
                   )),
               Container(
@@ -220,7 +273,11 @@ class _GameScreenState extends State<GameScreen> {
                   child: CustomButtom(
                     height: screenHeight / 20,
                     width: screenWidth / 3,
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        showCards = true;
+                      });
+                    },
                     text: "Check Cards",
                   )),
               Container(
@@ -267,7 +324,11 @@ class _GameScreenState extends State<GameScreen> {
                   child: CustomButtom(
                     height: screenHeight / 20,
                     width: screenWidth / 3,
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        showCards = true;
+                      });
+                    },
                     text: "Check Cards",
                   )),
             ],

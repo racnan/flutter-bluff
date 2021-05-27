@@ -79,6 +79,7 @@ class _RoomScreenState extends State<RoomScreen> {
     // server sends the state of the room after receiving "join"
     // or when a user disconnected
     socket.on('join-resp', (data) {
+      print(data);
       // data is an array
       // data[0]: state of the game,
       // data[1]: array of the name of the players in the room

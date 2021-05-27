@@ -18,10 +18,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   //if username and passoword doesn't match this is set to true
-  bool incorrect = false;
+  var incorrect = false;
 
   //for displaying message "Something went wrong"
-  bool somethingWentWorng = false;
+  var somethingWentWrong = false;
+
+  // for displaying the message "Already logged in"
+  var alreadyLoggedIn = false;
 
   @override
   Widget build(BuildContext context) {
@@ -182,13 +185,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontWeight: FontWeight.bold),
                     )),
               ),
-            if (somethingWentWorng)
+            if (somethingWentWrong)
               Center(
                 child: Container(
                     margin: EdgeInsets.all(10),
                     padding: EdgeInsets.all(10),
                     child: Text(
                       "Oops! something went wrong.",
+                      style: TextStyle(
+                          fontSize: screenWidth * 0.03,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold),
+                    )),
+              ),
+            if (alreadyLoggedIn)
+              Center(
+                child: Container(
+                    margin: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      "Already logged in.",
                       style: TextStyle(
                           fontSize: screenWidth * 0.03,
                           color: Colors.red,
@@ -218,19 +234,30 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
 
+    // already logged in
+    else if (response.statusCode == 409) {
+      setState(() {
+        alreadyLoggedIn = true;
+        incorrect = false;
+        somethingWentWrong = false;
+      });
+    }
+
     //incorrect username or password
     else if (response.statusCode == 401) {
       setState(() {
-        incorrect = true;
-        somethingWentWorng = false;
+        incorrect = false;
+        alreadyLoggedIn = true;
+        somethingWentWrong = false;
       });
     }
 
     //if something went wrong
     else {
       setState(() {
-        somethingWentWorng = true;
         incorrect = false;
+        alreadyLoggedIn = false;
+        somethingWentWrong = true;
       });
     }
   }

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-class CardOnline extends StatelessWidget {
-  final String name;
-  final int cardsLeft;
-  final String currentTurn;
+import '../models/cards.dart';
 
-  CardOnline({@required this.name, this.cardsLeft, this.currentTurn});
+class CheckCards extends StatelessWidget {
+  final int card;
+  final int quantity;
+
+  CheckCards({@required this.card, @required this.quantity});
 
   @override
   Widget build(BuildContext context) {
@@ -18,14 +19,16 @@ class CardOnline extends StatelessWidget {
         children: [
           Container(
             child: Text(
-              name,
+              NumberCards[card],
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
           ),
-          if (cardsLeft != null)
-            Container(
-              child: Text("Cards left ${this.cardsLeft}"),
-            )
+          Container(
+            child: Text(
+              " x$quantity",
+              style: TextStyle(fontSize: 15),
+            ),
+          ),
         ],
       ),
       decoration: BoxDecoration(
