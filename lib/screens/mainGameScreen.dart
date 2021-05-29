@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import '../models/cards.dart';
+
 import '../widgets/listOnlineScroll.dart';
 import '../widgets/cardOnline.dart';
 import '../widgets/button.dart';
 import '../widgets/checkCards.dart';
+import '../widgets/playfair.dart';
 
 class GameScreen extends StatefulWidget {
   final String username;
@@ -44,7 +47,10 @@ class _GameScreenState extends State<GameScreen> {
 
   // the current "chaal"
   // "0" represents that no chaal is selected
-  String currentNumber = '0';
+  String currentChaal = '0';
+
+  // show this screen if the its first turn of chaal
+  var firstTurn = true;
 
   // shows the chaal select screen when true
   var chaalSelect = false;
@@ -59,7 +65,7 @@ class _GameScreenState extends State<GameScreen> {
   var showCards = false;
 
   // userdeck in numbers
-  var userDeck = [];
+  var userDeck = [1, 26, 6, 21];
 
   // orderdeck to show in "Check Cards"
   var orderedDeck = [
@@ -101,6 +107,14 @@ class _GameScreenState extends State<GameScreen> {
       });
     });
 
+    socket.on(
+        'chaal-select-resp',
+        (data) => {
+              setState(() {
+                currentChaal = data;
+              })
+            });
+
     var screenWidth = MediaQuery.of(context).size.width.roundToDouble();
     final screenHeight =
         MediaQuery.of(context).size.height.roundToDouble() - 20.0;
@@ -114,10 +128,14 @@ class _GameScreenState extends State<GameScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                  // color: Colors.blue,
-                  height: screenHeight / 2,
-                  width: screenWidth,
-                  child: upperDisplay(screenHeight, screenWidth)),
+                // color: Colors.blue,
+                height: screenHeight / 2,
+                width: screenWidth,
+                child: PlayFair(
+                  cards: userDeck,
+                ),
+              ),
+              // child: upperDisplay(screenHeight, screenWidth)),
               Container(
                 height: screenHeight / 2,
                 width: screenWidth,
@@ -138,20 +156,66 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget upperDisplay(double screenHeight, double screenWidth) {
     if (showCards) {
+      // part of every display
       return showCardsDisplay(screenHeight, screenWidth);
     } else if (chaalSelect) {
+      // part of first turn display
       return chaalDisplay(screenHeight, screenWidth);
-    } else if (userTurn && userCheck) {
+    } else if (firstTurn) {
+      return firstTurnDisplay(screenHeight, screenWidth);
+    } else if (userCheck) {
       return checkDisplay(screenHeight, screenWidth);
-    } else if (userTurn && !userCheck) {
+    } else if (userTurn) {
       return turnDisplay(screenHeight, screenWidth);
     } else {
       return normalDisplay(screenHeight, screenWidth);
     }
   }
 
+  // part of first turn display
   Widget chaalDisplay(double screenHeight, double screenWidth) {
-    return SingleChildScrollView();
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: chaalDisplayRowHelper(
+                      [0, 1, 2, 3, 4], screenHeight, screenWidth)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: chaalDisplayRowHelper(
+                      [5, 6, 7, 8, 9], screenHeight, screenWidth)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: chaalDisplayRowHelper(
+                      [10, 11, 12], screenHeight, screenWidth)),
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              child: CustomButtom(
+                height: screenHeight / 20,
+                width: screenWidth / 3,
+                text: "Back",
+                onPressed: () {
+                  setState(() {
+                    chaalSelect = false;
+                  });
+                },
+              ),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   Widget showCardsDisplay(double screenHeight, double screenWidth) {
@@ -185,11 +249,11 @@ class _GameScreenState extends State<GameScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              if (currentNumber != '1')
+              if (currentChaal != '1')
                 Container(
                     margin: EdgeInsets.all(10),
                     child: Text(
-                      'चाल : $currentNumber',
+                      'चाल : $currentChaal',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -242,6 +306,70 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  Widget firstTurnDisplay(double screenHeight, double screenWidth) {
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (currentChaal != '0')
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text(
+                    'चाल : $currentChaal',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: screenHeight * 0.03),
+                  )),
+            Container(
+                margin: EdgeInsets.all(10),
+                child: CustomButtom(
+                  height: screenHeight / 20,
+                  width: screenWidth / 3,
+                  onPressed: () {
+                    setState(() {
+                      chaalSelect = true;
+                    });
+                  },
+                  text: "Select चाल",
+                )),
+            Container(
+                margin: EdgeInsets.all(10),
+                child: CustomButtom(
+                  height: screenHeight / 20,
+                  width: screenWidth / 3,
+                  onPressed: () {
+                    setState(() {
+                      showCards = true;
+                    });
+                  },
+                  text: "Check Cards",
+                )),
+            if (currentChaal != '0')
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: CustomButtom(
+                    height: screenHeight / 20,
+                    width: screenWidth / 4,
+                    onPressed: () {},
+                    text: "Play Fair",
+                  )),
+            if (currentChaal != '0')
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: CustomButtom(
+                    height: screenHeight / 20,
+                    width: screenWidth / 4,
+                    onPressed: () {},
+                    text: "Bluff",
+                  ))
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget turnDisplay(double screenHeight, double screenWidth) {
     return Center(
       child: Padding(
@@ -249,25 +377,15 @@ class _GameScreenState extends State<GameScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              if (currentNumber == '0')
-                Container(
-                    margin: EdgeInsets.all(10),
-                    child: CustomButtom(
-                      height: screenHeight / 20,
-                      width: screenWidth / 3,
-                      onPressed: () {},
-                      text: "Select चाल",
-                    )),
-              if (currentNumber != '0')
-                Container(
-                    margin: EdgeInsets.all(10),
-                    child: Text(
-                      'चाल : $currentNumber',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontSize: screenHeight * 0.03),
-                    )),
+              Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text(
+                    'चाल : $currentChaal',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: screenHeight * 0.03),
+                  )),
               Container(
                   margin: EdgeInsets.all(10),
                   child: CustomButtom(
@@ -313,7 +431,7 @@ class _GameScreenState extends State<GameScreen> {
               Container(
                   margin: EdgeInsets.all(10),
                   child: Text(
-                    'चाल : $currentNumber',
+                    'चाल : $currentChaal',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -336,5 +454,29 @@ class _GameScreenState extends State<GameScreen> {
         ),
       ),
     );
+  }
+
+// ------ HELPER FUNCTIONS ------
+
+  List<Widget> chaalDisplayRowHelper(
+      List<int> li, double screenHeight, double screenWidth) {
+    var rw = <Widget>[];
+    for (var i = 0; i < li.length; i++) {
+      rw.add(
+        CustomButtom(
+          height: screenHeight / 20,
+          width: screenWidth / 6,
+          onPressed: () {
+            setState(() {
+              currentChaal = NumberCards[li[i]];
+              chaalSelect = false;
+              socket.emit('chaal-select', li[i]);
+            });
+          },
+          text: "${NumberCards[li[i]]}",
+        ),
+      );
+    }
+    return rw;
   }
 }
