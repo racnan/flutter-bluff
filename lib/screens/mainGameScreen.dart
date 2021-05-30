@@ -6,9 +6,8 @@ import '../models/cards.dart';
 
 import '../widgets/listOnlineScroll.dart';
 import '../widgets/cardOnline.dart';
-import '../widgets/button.dart';
+import '../widgets/customButton.dart';
 import '../widgets/checkCards.dart';
-import '../widgets/playfair.dart';
 
 class GameScreen extends StatefulWidget {
   final String username;
@@ -64,8 +63,40 @@ class _GameScreenState extends State<GameScreen> {
   // display cards
   var showCards = false;
 
+  // display playbluff screen
+  var playBluff = true;
+
   // userdeck in numbers
-  var userDeck = [1, 26, 6, 21];
+  var userDeck = [
+    1,
+    26,
+    6,
+    21,
+    34,
+    33,
+    51,
+    1,
+    26,
+    6,
+    21,
+    34,
+    33,
+    51,
+    1,
+    26,
+    6,
+    21,
+    34,
+    33,
+    51,
+    1,
+    26,
+    6,
+    21,
+    34,
+    33,
+    51
+  ];
 
   // orderdeck to show in "Check Cards"
   var orderedDeck = [
@@ -77,6 +108,8 @@ class _GameScreenState extends State<GameScreen> {
     [1, 9],
     [1, 10],
   ];
+
+  var playBluffSelectedCardsIndex = <int>[];
 
   @override
   Widget build(BuildContext context) {
@@ -131,11 +164,8 @@ class _GameScreenState extends State<GameScreen> {
                 // color: Colors.blue,
                 height: screenHeight / 2,
                 width: screenWidth,
-                child: PlayFair(
-                  cards: userDeck,
-                ),
+                child: upperDisplay(screenHeight, screenWidth),
               ),
-              // child: upperDisplay(screenHeight, screenWidth)),
               Container(
                 height: screenHeight / 2,
                 width: screenWidth,
@@ -161,6 +191,9 @@ class _GameScreenState extends State<GameScreen> {
     } else if (chaalSelect) {
       // part of first turn display
       return chaalDisplay(screenHeight, screenWidth);
+    } else if (playBluff) {
+      // Part of turnDisplay and firstTurnDisplay
+      return playBluffDisplay(screenHeight, screenWidth);
     } else if (firstTurn) {
       return firstTurnDisplay(screenHeight, screenWidth);
     } else if (userCheck) {
@@ -170,6 +203,62 @@ class _GameScreenState extends State<GameScreen> {
     } else {
       return normalDisplay(screenHeight, screenWidth);
     }
+  }
+
+// -------------- SECONDARY DISPLAYS --------------
+// below displays are for upper half of the screen
+// they are displayed after a button press from the Primary upper display
+
+  // Part of turnDisplay and firstTurnDisplay
+  Widget playBluffDisplay(double screenHeight, double screenWidth) {
+    return SingleChildScrollView(
+      child: Column(children: [
+        ...allCardsDisp(screenHeight, screenWidth),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            if (playBluffSelectedCardsIndex.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomButtom(
+                  height: screenHeight / 20,
+                  width: screenWidth / 4,
+                  onPressed: () {
+                    setState(() {
+                      playBluffSelectedCardsIndex = [];
+                    });
+                  },
+                  text: "unselect all",
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CustomButtom(
+                height: screenHeight / 20,
+                width: screenWidth / 4,
+                onPressed: () {
+                  setState(() {
+                    playBluff = false;
+                    playBluffSelectedCardsIndex = [];
+                  });
+                },
+                text: "Back",
+              ),
+            ),
+            if (playBluffSelectedCardsIndex.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomButtom(
+                  height: screenHeight / 20,
+                  width: screenWidth / 4,
+                  onPressed: () {},
+                  text: "Bluff",
+                ),
+              ),
+          ],
+        ),
+      ]),
+    );
   }
 
   // part of first turn display
@@ -241,6 +330,10 @@ class _GameScreenState extends State<GameScreen> {
       )
     ]);
   }
+
+// -------------- PRIMARY DISPLAYS --------------
+// below displays are for upper half of the screen
+// these display leads to secondary upper display by button clicks
 
   Widget checkDisplay(double screenHeight, double screenWidth) {
     return Center(
@@ -361,7 +454,11 @@ class _GameScreenState extends State<GameScreen> {
                   child: CustomButtom(
                     height: screenHeight / 20,
                     width: screenWidth / 4,
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        playBluff = true;
+                      });
+                    },
                     text: "Bluff",
                   ))
           ],
@@ -411,7 +508,11 @@ class _GameScreenState extends State<GameScreen> {
                   child: CustomButtom(
                     height: screenHeight / 20,
                     width: screenWidth / 4,
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        playBluff = true;
+                      });
+                    },
                     text: "Bluff",
                   ))
             ],
@@ -478,5 +579,45 @@ class _GameScreenState extends State<GameScreen> {
       );
     }
     return rw;
+  }
+
+  List<Widget> allCardsDisp(double screenHeight, double screenWidth) {
+    var totalRws = <Widget>[];
+    var rw = <Widget>[];
+    for (var i = 0; i < userDeck.length; i++) {
+      rw.add(Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: CustomButtom(
+            color: playBluffSelectedCardsIndex.contains(i)
+                ? Colors.blueGrey
+                : null,
+            height: screenHeight / 20,
+            width: screenWidth / 5,
+            onPressed: () {
+              setState(() {
+                if (playBluffSelectedCardsIndex.contains(i)) {
+                  playBluffSelectedCardsIndex.remove(i);
+                } else {
+                  playBluffSelectedCardsIndex.add(i);
+                }
+              });
+            },
+            cardNumber: userDeck[i]),
+      ));
+      if ((i + 1) % 4 == 0) {
+        totalRws.add(Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: rw,
+        ));
+        rw = <Widget>[];
+      }
+    }
+    if (rw.isNotEmpty) {
+      totalRws.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: rw,
+      ));
+    }
+    return totalRws;
   }
 }

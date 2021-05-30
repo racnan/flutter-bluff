@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import './roomScreen.dart';
 
-import '../widgets/button.dart';
+import '../widgets/customButton.dart';
 
 class LoginScreen extends StatefulWidget {
   @override

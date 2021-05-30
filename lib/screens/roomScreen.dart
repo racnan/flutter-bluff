@@ -6,7 +6,7 @@ import './mainGameScreen.dart';
 
 import '../widgets/listOnlineScroll.dart';
 import '../widgets/cardOnline.dart';
-import '../widgets/button.dart';
+import '../widgets/customButton.dart';
 
 class RoomScreen extends StatefulWidget {
   final String username;
