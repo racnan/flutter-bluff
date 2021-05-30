@@ -45,8 +45,10 @@ class _GameScreenState extends State<GameScreen> {
   ];
 
   // the current "chaal"
-  // "0" represents that no chaal is selected
-  String currentChaal = '0';
+  int currentChaal;
+
+  // play fair quantity
+  var playFairQuant = 1;
 
   // show this screen if the its first turn of chaal
   var firstTurn = true;
@@ -55,7 +57,7 @@ class _GameScreenState extends State<GameScreen> {
   var chaalSelect = false;
 
   // true if current turn is users
-  var userTurn = true;
+  var userTurn = false;
 
   // if user can check the turn before
   var userCheck = false;
@@ -64,7 +66,10 @@ class _GameScreenState extends State<GameScreen> {
   var showCards = false;
 
   // display playbluff screen
-  var playBluff = true;
+  var playBluff = false;
+
+  // display playFair screen
+  var playFair = false;
 
   // userdeck in numbers
   var userDeck = [
@@ -154,6 +159,7 @@ class _GameScreenState extends State<GameScreen> {
     screenWidth = screenWidth < 1000 ? screenWidth : 1000;
 
     return Scaffold(
+        backgroundColor: Colors.blueGrey[50],
         resizeToAvoidBottomInset: false,
         body: Center(
           child: Column(
@@ -185,6 +191,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget upperDisplay(double screenHeight, double screenWidth) {
+    // secondary display
     if (showCards) {
       // part of every display
       return showCardsDisplay(screenHeight, screenWidth);
@@ -194,14 +201,20 @@ class _GameScreenState extends State<GameScreen> {
     } else if (playBluff) {
       // Part of turnDisplay and firstTurnDisplay
       return playBluffDisplay(screenHeight, screenWidth);
-    } else if (firstTurn) {
+    } else if (playFair) {
+      // Part of turnDisplay and firstTurnDisplay
+      return playFairDisplay(screenHeight, screenWidth);
+    }
+
+    // Primary display
+    else if (firstTurn) {
       return firstTurnDisplay(screenHeight, screenWidth);
     } else if (userCheck) {
       return checkDisplay(screenHeight, screenWidth);
     } else if (userTurn) {
       return turnDisplay(screenHeight, screenWidth);
     } else {
-      return normalDisplay(screenHeight, screenWidth);
+      return nonTurnDisplay(screenHeight, screenWidth);
     }
   }
 
@@ -209,11 +222,78 @@ class _GameScreenState extends State<GameScreen> {
 // below displays are for upper half of the screen
 // they are displayed after a button press from the Primary upper display
 
+  Widget playFairDisplay(double screenHeight, double screenWidth) {
+    var dropDownNumList = <DropdownMenuItem<int>>[];
+
+    for (var i = 0; i < orderedDeck.length; i++) {
+      if (orderedDeck[i][0] == currentChaal) {
+        for (var j = 0; j < orderedDeck[i][1]; j++) {
+          dropDownNumList.add(DropdownMenuItem<int>(
+            value: j + 1,
+            child: Text((j + 1).toString()),
+          ));
+        }
+        break;
+      }
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+              margin: EdgeInsets.all(10),
+              child: Text(
+                'चाल : ${NumberCards[currentChaal]}',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontSize: screenHeight * 0.03),
+              )),
+          Container(
+            padding: EdgeInsets.all(8),
+            child: DropdownButton<int>(
+              value: playFairQuant,
+              onChanged: (value) {
+                setState(() {
+                  playFairQuant = value;
+                });
+              },
+              items: dropDownNumList,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.all(8),
+            child: CustomButtom(
+              height: screenHeight / 20,
+              width: screenWidth / 3,
+              text: "Send",
+              onPressed: () {},
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.all(8),
+            child: CustomButtom(
+              height: screenHeight / 20,
+              width: screenWidth / 3,
+              text: "Back",
+              onPressed: () {
+                setState(() {
+                  playFair = false;
+                });
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   // Part of turnDisplay and firstTurnDisplay
   Widget playBluffDisplay(double screenHeight, double screenWidth) {
     return SingleChildScrollView(
       child: Column(children: [
-        ...allCardsDisp(screenHeight, screenWidth),
+        ...playBluffHelper(screenHeight, screenWidth),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -342,11 +422,11 @@ class _GameScreenState extends State<GameScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              if (currentChaal != '1')
+              if (currentChaal != null)
                 Container(
                     margin: EdgeInsets.all(10),
                     child: Text(
-                      'चाल : $currentChaal',
+                      'चाल : ${NumberCards[currentChaal]}',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
@@ -405,11 +485,11 @@ class _GameScreenState extends State<GameScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (currentChaal != '0')
+            if (currentChaal != null)
               Container(
                   margin: EdgeInsets.all(10),
                   child: Text(
-                    'चाल : $currentChaal',
+                    'चाल : ${NumberCards[currentChaal]}',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -439,16 +519,20 @@ class _GameScreenState extends State<GameScreen> {
                   },
                   text: "Check Cards",
                 )),
-            if (currentChaal != '0')
+            if (currentChaal != null)
               Container(
                   margin: EdgeInsets.all(10),
                   child: CustomButtom(
                     height: screenHeight / 20,
                     width: screenWidth / 4,
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        playFair = true;
+                      });
+                    },
                     text: "Play Fair",
                   )),
-            if (currentChaal != '0')
+            if (currentChaal != null)
               Container(
                   margin: EdgeInsets.all(10),
                   child: CustomButtom(
@@ -477,7 +561,7 @@ class _GameScreenState extends State<GameScreen> {
               Container(
                   margin: EdgeInsets.all(10),
                   child: Text(
-                    'चाल : $currentChaal',
+                    'चाल : ${NumberCards[currentChaal]}}',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -500,7 +584,11 @@ class _GameScreenState extends State<GameScreen> {
                   child: CustomButtom(
                     height: screenHeight / 20,
                     width: screenWidth / 4,
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        playFair = true;
+                      });
+                    },
                     text: "Play Fair",
                   )),
               Container(
@@ -522,22 +610,23 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget normalDisplay(double screenHeight, double screenWidth) {
+  Widget nonTurnDisplay(double screenHeight, double screenWidth) {
     return Center(
       child: Padding(
         padding: EdgeInsets.all(10),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                  margin: EdgeInsets.all(10),
-                  child: Text(
-                    'चाल : $currentChaal',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontSize: screenHeight * 0.03),
-                  )),
+              if (currentChaal != null)
+                Container(
+                    margin: EdgeInsets.all(10),
+                    child: Text(
+                      'चाल : ${NumberCards[currentChaal]}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: screenHeight * 0.03),
+                    )),
               Container(
                   margin: EdgeInsets.all(10),
                   child: CustomButtom(
@@ -557,7 +646,7 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-// ------ HELPER FUNCTIONS ------
+// ------------------ HELPER FUNCTIONS ------------------
 
   List<Widget> chaalDisplayRowHelper(
       List<int> li, double screenHeight, double screenWidth) {
@@ -569,7 +658,7 @@ class _GameScreenState extends State<GameScreen> {
           width: screenWidth / 6,
           onPressed: () {
             setState(() {
-              currentChaal = NumberCards[li[i]];
+              currentChaal = li[i];
               chaalSelect = false;
               socket.emit('chaal-select', li[i]);
             });
@@ -581,7 +670,7 @@ class _GameScreenState extends State<GameScreen> {
     return rw;
   }
 
-  List<Widget> allCardsDisp(double screenHeight, double screenWidth) {
+  List<Widget> playBluffHelper(double screenHeight, double screenWidth) {
     var totalRws = <Widget>[];
     var rw = <Widget>[];
     for (var i = 0; i < userDeck.length; i++) {
