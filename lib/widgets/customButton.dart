@@ -23,7 +23,7 @@ class CustomButtom extends StatelessWidget {
       color: color == null ? Colors.white : color,
       child: InkWell(
         splashColor: Colors.blueGrey,
-        onTap: onPressed,
+        onTap: () => onPressed(),
         child: Container(
           height: height,
           width: width,

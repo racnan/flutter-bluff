@@ -33,7 +33,8 @@ class _RoomScreenState extends State<RoomScreen> {
   // disconnect the Socket connection when the user leaves
   @override
   void dispose() {
-    socket.io.disconnect();
+    print("Room: dispose");
+    socket.dispose();
     super.dispose();
   }
 
@@ -75,6 +76,10 @@ class _RoomScreenState extends State<RoomScreen> {
       initialized = true;
       socket.emit('join', widget.username);
     }
+
+    // when idle, the sockets dissconnect and then reconnects automatically
+    // this function will send the username to server upon reconnection
+    socket.onReconnect((data) => socket.emit("reconnectt", widget.username));
 
     // server sends the state of the room after receiving "join"
     // or when a user disconnected

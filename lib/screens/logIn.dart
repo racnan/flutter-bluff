@@ -246,8 +246,8 @@ class _LoginScreenState extends State<LoginScreen> {
     //incorrect username or password
     else if (response.statusCode == 401) {
       setState(() {
-        incorrect = false;
-        alreadyLoggedIn = true;
+        incorrect = true;
+        alreadyLoggedIn = false;
         somethingWentWrong = false;
       });
     }

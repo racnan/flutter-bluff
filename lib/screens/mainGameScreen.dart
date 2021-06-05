@@ -26,7 +26,8 @@ class _GameScreenState extends State<GameScreen> {
   // disconnect the Socket connection when the user leaves
   @override
   void dispose() {
-    socket.io.disconnect();
+    print("MG: dispose");
+    socket.dispose();
     super.dispose();
   }
 
@@ -36,31 +37,28 @@ class _GameScreenState extends State<GameScreen> {
 
   // list with username and cards left arranged according turns.
   var mainGameList = [
-    ["abc", 2],
+    /* ["abc", 2],
     ["xyz", 6],
     ["abc", 2],
     ["xyz", 6],
     ["abc", 2],
-    ["xyz", 6],
+    ["xyz", 6], */
   ];
 
   // the current "chaal"
   int currentChaal;
 
-  // play fair quantity
-  var playFairQuant = 1;
-
   // show this screen if the its first turn of chaal
-  var firstTurn = true;
-
-  // shows the chaal select screen when true
-  var chaalSelect = false;
+  var firstTurn = false;
 
   // true if current turn is users
   var userTurn = false;
 
   // if user can check the turn before
   var userCheck = false;
+
+  // shows the chaal select screen when true
+  var chaalSelect = false;
 
   // display cards
   var showCards = false;
@@ -73,51 +71,37 @@ class _GameScreenState extends State<GameScreen> {
 
   // userdeck in numbers
   var userDeck = [
-    1,
+    /* 1,
     26,
     6,
     21,
     34,
     33,
-    51,
-    1,
-    26,
-    6,
-    21,
-    34,
-    33,
-    51,
-    1,
-    26,
-    6,
-    21,
-    34,
-    33,
-    51,
-    1,
-    26,
-    6,
-    21,
-    34,
-    33,
-    51
+    51, */
   ];
 
   // orderdeck to show in "Check Cards"
   var orderedDeck = [
-    [1, 3],
+    /* [1, 3],
     [2, 5],
     [1, 6],
     [1, 7],
     [1, 8],
     [1, 9],
-    [1, 10],
+    [1, 10], */
   ];
 
   var playBluffSelectedCardsIndex = <int>[];
 
+  // play fair quantity
+  var playFairQuant = 1;
+
   @override
   Widget build(BuildContext context) {
+    // when idle, the sockets dissconnect and then reconnects automatically
+    // this function will send the username to server upon reconnection
+    socket.onReconnect((data) => socket.emit("reconnectt", widget.username));
+
     // this is done so that socket.emit() is only executed for first build
     // otherwise, with every setState() socket.emit('join) will be called which
     // will again cause a rebuild.[Looped]
@@ -131,6 +115,7 @@ class _GameScreenState extends State<GameScreen> {
     // data[1] -> [2,34,6,...] deck of the user
     // data[2] -> [[1,3],[13,2],...] ordered deck
     // data[3] -> "username" current turn
+    // data[4] -> bool isfirstTurn
     socket.on('intialize-resp', (data) {
       setState(() {
         mainGameList = data[0];
@@ -139,19 +124,47 @@ class _GameScreenState extends State<GameScreen> {
 
         if (data[3] == widget.username) {
           userTurn = true;
+
+          firstTurn = data[4];
+          userCheck = !data[4];
         } else {
           userTurn = false;
         }
       });
     });
 
-    socket.on(
-        'chaal-select-resp',
-        (data) => {
-              setState(() {
-                currentChaal = data;
-              })
-            });
+    socket.on('chaal-select-resp', (data) {
+      print("chaal-sel-reso");
+      setState(() {
+        currentChaal = data;
+      });
+    });
+
+    socket.on('played-resp', (data) {
+      print("MG: played resp");
+      setState(() {
+        mainGameList = data[0];
+        userDeck = data[1];
+        orderedDeck = data[2];
+      });
+    });
+
+    socket.on('played', (data) {
+      print("MG: played");
+
+      setState(() {
+        mainGameList = data[0];
+
+        if (data[1] == widget.username) {
+          userTurn = true;
+
+          firstTurn = data[2];
+          userCheck = !data[2];
+        } else {
+          userTurn = false;
+        }
+      });
+    });
 
     var screenWidth = MediaQuery.of(context).size.width.roundToDouble();
     final screenHeight =
@@ -268,7 +281,15 @@ class _GameScreenState extends State<GameScreen> {
               height: screenHeight / 20,
               width: screenWidth / 3,
               text: "Send",
-              onPressed: () {},
+              onPressed: () {
+                socket.emit('played-fair', playFairQuant);
+                setState(() {
+                  playFair = false;
+                  userTurn = false;
+                  userCheck = false;
+                  firstTurn = false;
+                });
+              },
             ),
           ),
           Container(
@@ -292,7 +313,7 @@ class _GameScreenState extends State<GameScreen> {
   // Part of turnDisplay and firstTurnDisplay
   Widget playBluffDisplay(double screenHeight, double screenWidth) {
     return SingleChildScrollView(
-      child: Column(children: [
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         ...playBluffHelper(screenHeight, screenWidth),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -331,7 +352,15 @@ class _GameScreenState extends State<GameScreen> {
                 child: CustomButtom(
                   height: screenHeight / 20,
                   width: screenWidth / 4,
-                  onPressed: () {},
+                  onPressed: () {
+                    socket.emit('played-bluff', playBluffSelectedCardsIndex);
+                    setState(() {
+                      playBluff = false;
+                      userTurn = false;
+                      firstTurn = false;
+                      userCheck = false;
+                    });
+                  },
                   text: "Bluff",
                 ),
               ),
@@ -660,8 +689,8 @@ class _GameScreenState extends State<GameScreen> {
             setState(() {
               currentChaal = li[i];
               chaalSelect = false;
-              socket.emit('chaal-select', li[i]);
             });
+            socket.emit('chaal-select', li[i]);
           },
           text: "${NumberCards[li[i]]}",
         ),
