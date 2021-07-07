@@ -26,9 +26,11 @@ enum roomState { inactive, active, waiting, error }
 
 class _RoomScreenState extends State<RoomScreen> {
   // intialize the socketed connection with the server
-  IO.Socket socket = IO.io('http://192.168.1.38:3000/room', <String, dynamic>{
-    'transports': ['websocket'],
-  });
+  IO.Socket socket = IO.io(
+      'http://192.168.1.38:3000/room',
+      IO.OptionBuilder().setTransports(['websocket'])
+          //.setReconnectionDelay(5000)
+          .build());
 
   // disconnect the Socket connection when the user leaves
   @override
@@ -80,7 +82,8 @@ class _RoomScreenState extends State<RoomScreen> {
     // when idle, the sockets dissconnect and then reconnects automatically
     // this function will send the username to server upon reconnection
     socket.onReconnect((data) => socket.emit("reconnectt", widget.username));
-
+    /*  socket.onPing((data) => print("ping"));
+    socket.onPong((data) => print("pong")); */
     // server sends the state of the room after receiving "join"
     // or when a user disconnected
     socket.on('join-resp', (data) {

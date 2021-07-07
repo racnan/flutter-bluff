@@ -151,7 +151,7 @@ class _GameScreenState extends State<GameScreen> {
 
     socket.on('played', (data) {
       print("MG: played");
-
+      print(data);
       setState(() {
         mainGameList = data[0];
 
